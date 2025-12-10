@@ -131,7 +131,13 @@ function getDashboardData($db) {
             $stmt = $db->prepare($query);
             $stmt->execute();
             $storage = $stmt->fetch();
-            $storageLeft = $storage ? round(($storage['used_capacity'] / $storage['total_capacity']) * 100) : 0;
+            // Calculate remaining capacity percentage (not used capacity)
+            if ($storage && $storage['total_capacity'] > 0) {
+                $remainingCapacity = $storage['total_capacity'] - $storage['used_capacity'];
+                $storageLeft = round(($remainingCapacity / $storage['total_capacity']) * 100);
+            } else {
+                $storageLeft = 0;
+            }
         }
         
         // Harvest trends (last 12 months)
