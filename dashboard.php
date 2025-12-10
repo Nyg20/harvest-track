@@ -108,7 +108,7 @@ $currentUser = getCurrentUser();
                     <div class="card">
                         <div class="card-icon"><?php echo $currentUser['role'] === 'farmer' ? '📊' : '📦'; ?></div>
                         <div class="card-content">
-                            <h3><?php echo $currentUser['role'] === 'farmer' ? 'My Contribution' : 'Storage Capacity Left'; ?></h3>
+                            <h3><?php echo $currentUser['role'] === 'farmer' ? 'My Contribution' : 'Storage Capacity Used'; ?></h3>
                             <p class="card-value" id="storageLeft">Loading...</p>
                             <small>%</small>
                         </div>

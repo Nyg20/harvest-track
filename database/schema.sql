@@ -81,11 +81,12 @@ CREATE TABLE notifications (
 ) ENGINE=InnoDB;
 
 -- Storage Capacity Table
+-- Note: used_capacity is deprecated - actual usage is calculated from harvests table
 CREATE TABLE storage_capacity (
     id INT AUTO_INCREMENT PRIMARY KEY,
     location VARCHAR(255) NOT NULL,
     total_capacity DECIMAL(10, 2) NOT NULL,
-    used_capacity DECIMAL(10, 2) DEFAULT 0,
+    used_capacity DECIMAL(10, 2) DEFAULT 0, -- Deprecated: calculated dynamically from harvests
     unit VARCHAR(20) DEFAULT 'tons',
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB;

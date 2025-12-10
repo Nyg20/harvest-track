@@ -116,9 +116,9 @@ function getDashboardData($db) {
         }
         $cropsInSeason = $stmt->fetchAll(PDO::FETCH_COLUMN);
         
-        // Storage capacity (only for admin/officer)
+        // Storage/Contribution percentage
         if ($currentUser['role'] === 'farmer') {
-            // Farmers see their own harvest percentage of total instead
+            // Farmers see their own harvest percentage of total
             $totalQuery = "SELECT SUM(quantity) as total FROM harvests";
             $totalStmt = $db->prepare($totalQuery);
             $totalStmt->execute();
@@ -127,17 +127,22 @@ function getDashboardData($db) {
             $farmerHarvests = $totalHarvests; // Already calculated above for farmer
             $storageLeft = $totalHarvestsAll > 0 ? round(($farmerHarvests / $totalHarvestsAll) * 100) : 0;
         } else {
-            $query = "SELECT total_capacity, used_capacity FROM storage_capacity LIMIT 1";
-            $stmt = $db->prepare($query);
-            $stmt->execute();
-            $storage = $stmt->fetch();
-            // Calculate remaining capacity percentage (not used capacity)
-            if ($storage && $storage['total_capacity'] > 0) {
-                $remainingCapacity = $storage['total_capacity'] - $storage['used_capacity'];
-                $storageLeft = round(($remainingCapacity / $storage['total_capacity']) * 100);
-            } else {
-                $storageLeft = 0;
-            }
+            // Admin/Officer see storage utilization based on actual harvest records
+            // Get total capacity from storage_capacity table
+            $capacityQuery = "SELECT total_capacity FROM storage_capacity LIMIT 1";
+            $capacityStmt = $db->prepare($capacityQuery);
+            $capacityStmt->execute();
+            $capacityData = $capacityStmt->fetch();
+            $totalCapacity = $capacityData['total_capacity'] ?? 1000; // Default 1000 tons if not set
+            
+            // Calculate actual used capacity from harvest records (sum of all harvests)
+            $usedQuery = "SELECT SUM(quantity) as total_used FROM harvests";
+            $usedStmt = $db->prepare($usedQuery);
+            $usedStmt->execute();
+            $usedCapacity = $usedStmt->fetch()['total_used'] ?? 0;
+            
+            // Calculate utilization percentage
+            $storageLeft = $totalCapacity > 0 ? round(($usedCapacity / $totalCapacity) * 100) : 0;
         }
         
         // Harvest trends (last 12 months)
